@@ -6,57 +6,57 @@
 
   https://www.arduino.cc/en/Tutorial/BuiltInExamples/Debounce
 */
-const int pinDeBoton = 2;  // the number of the pushbutton pin
-const int ledPin = 13;    // the number of the LED pin
+const int pinDeBoton = 2;  // El número del pin que recibirá la señal de que el botón ha sido presionado
+const int ledPin = 7;    // El pin al que está conectado el led
 
-// Variables will change:
-int estadoLed = HIGH;        // the current state of the output pin
-int estadoDelBoton;            // the current lectura from the input pin
-int ultimoEstadoDelBoton = LOW;  // the previous lectura from the input pin
+int estadoLed = HIGH;        // El estado actual de salida para el led
+int estadoDelBoton;            // La lectura actual del pin de entrada
+int ultimoEstadoDelBoton = LOW;  // La lectura anterior del pin de entrada
 
-// the following variables are unsigned longs because the time, measured in
-// milliseconds, will quickly become a bigger number than can be stored in an int.
-unsigned long ultimoMomentoDeRebote = 0;  // the last time the output pin was toggled
-unsigned long delayRebote = 50;    // the debounce time; increase if the output flickers
+
+// Las siguientes variables son longs sin signo porque el tiempo, almacenado en milisegundos,
+// rápidamente se convertirá en un número más grande del que puede ser almacenado en int
+unsigned long ultimoMomentoDeRebote = 0;  // El último momento que el pin de salida fue activado
+unsigned long delayRebote = 50;    // El tiempo de rebote. Se puede aumentar manualmente si el mismo es muy bajo
 
 void setup() {
   pinMode(pinDeBoton, INPUT);
   pinMode(ledPin, OUTPUT);
 
-  // set initial LED state
+  // Damos un valor inicial al led
   digitalWrite(ledPin, estadoLed);
 }
 
 void loop() {
-  // read the state of the switch into a local variable:
+  // Leoo el estado del switch en una variable local read the state of the switch into a local variable:
   int lectura = digitalRead(pinDeBoton);
 
-  // check to see if you just pressed the button
-  // (i.e. the input went from LOW to HIGH), and you've waited long enough
-  // since the last press to ignore any noise:
+  // Observo si el botón fue presionado, y si pasó el tiempo suficiente desde la última vez que se lo presionó
+  // Si no pasó suficiente tiempo, la señal es ignorada
 
-  // If the switch changed, due to noise or pressing:
+  // Si el switch cambió, sea por ruido o presionado:
   if (lectura != ultimoEstadoDelBoton) {
-    // reset the debouncing timer
+    // Actualizo el momento del último rebote
     ultimoMomentoDeRebote = millis();
   }
 
   if ((millis() - ultimoMomentoDeRebote) > delayRebote) {
+    // Si entré a este if, es porque el tiempo desde
     // whatever the lectura is at, it's been there for longer than the debounce
     // delay, so take it as the actual current state:
 
-    // if the button state has changed:
+    // Si el estado del botón cambió:
     if (lectura != estadoDelBoton) {
       estadoDelBoton = lectura;
 
-      // only toggle the LED if the new button state is HIGH
+      // Sólo cambio el valor del led si el nuevo estado del botón es HIGH
       if (estadoDelBoton == HIGH) {
         estadoLed = !estadoLed;
       }
     }
   }
 
-  // set the LED:
+  // Actualizo el estado del led
   digitalWrite(ledPin, estadoLed);
 
   // save the lectura. Next time through the loop, it'll be the ultimoEstadoDelBoton:
