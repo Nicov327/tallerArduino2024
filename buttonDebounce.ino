@@ -1,77 +1,64 @@
 /*
   El circuito:
-  - LED desde el pin hasta tierra a través de una resistencia de 220 omh
-  - Botón dpushbutton attached from pin 2 to +5V
-  - 10 kilohm resistor attached from pin 2 to ground
-
-  created 21 Nov 2006
-  by David A. Mellis
-  modified 30 Aug 2011
-  by Limor Fried
-  modified 28 Dec 2012
-  by Mike Walters
-  modified 30 Aug 2016
-  by Arturo Guadalupi
-
-  This example code is in the public domain.
+  - LED desde el pin (pin 7 en este ejemplo) hasta tierra a través de una resistencia de 220 omh
+  - Botón desde pin 2 a +5V
+  - Resistencia de 10 kilohmios desde pin 2 a tierra
 
   https://www.arduino.cc/en/Tutorial/BuiltInExamples/Debounce
 */
-
-// constants won't change. They're used here to set pin numbers:
-const int buttonPin = 2;  // the number of the pushbutton pin
+const int pinDeBoton = 2;  // the number of the pushbutton pin
 const int ledPin = 13;    // the number of the LED pin
 
 // Variables will change:
-int ledState = HIGH;        // the current state of the output pin
-int buttonState;            // the current reading from the input pin
-int lastButtonState = LOW;  // the previous reading from the input pin
+int estadoLed = HIGH;        // the current state of the output pin
+int estadoDelBoton;            // the current lectura from the input pin
+int ultimoEstadoDelBoton = LOW;  // the previous lectura from the input pin
 
 // the following variables are unsigned longs because the time, measured in
 // milliseconds, will quickly become a bigger number than can be stored in an int.
-unsigned long lastDebounceTime = 0;  // the last time the output pin was toggled
-unsigned long debounceDelay = 50;    // the debounce time; increase if the output flickers
+unsigned long ultimoMomentoDeRebote = 0;  // the last time the output pin was toggled
+unsigned long delayRebote = 50;    // the debounce time; increase if the output flickers
 
 void setup() {
-  pinMode(buttonPin, INPUT);
+  pinMode(pinDeBoton, INPUT);
   pinMode(ledPin, OUTPUT);
 
   // set initial LED state
-  digitalWrite(ledPin, ledState);
+  digitalWrite(ledPin, estadoLed);
 }
 
 void loop() {
   // read the state of the switch into a local variable:
-  int reading = digitalRead(buttonPin);
+  int lectura = digitalRead(pinDeBoton);
 
   // check to see if you just pressed the button
   // (i.e. the input went from LOW to HIGH), and you've waited long enough
   // since the last press to ignore any noise:
 
   // If the switch changed, due to noise or pressing:
-  if (reading != lastButtonState) {
+  if (lectura != ultimoEstadoDelBoton) {
     // reset the debouncing timer
-    lastDebounceTime = millis();
+    ultimoMomentoDeRebote = millis();
   }
 
-  if ((millis() - lastDebounceTime) > debounceDelay) {
-    // whatever the reading is at, it's been there for longer than the debounce
+  if ((millis() - ultimoMomentoDeRebote) > delayRebote) {
+    // whatever the lectura is at, it's been there for longer than the debounce
     // delay, so take it as the actual current state:
 
     // if the button state has changed:
-    if (reading != buttonState) {
-      buttonState = reading;
+    if (lectura != estadoDelBoton) {
+      estadoDelBoton = lectura;
 
       // only toggle the LED if the new button state is HIGH
-      if (buttonState == HIGH) {
-        ledState = !ledState;
+      if (estadoDelBoton == HIGH) {
+        estadoLed = !estadoLed;
       }
     }
   }
 
   // set the LED:
-  digitalWrite(ledPin, ledState);
+  digitalWrite(ledPin, estadoLed);
 
-  // save the reading. Next time through the loop, it'll be the lastButtonState:
-  lastButtonState = reading;
+  // save the lectura. Next time through the loop, it'll be the ultimoEstadoDelBoton:
+  ultimoEstadoDelBoton = lectura;
 }
