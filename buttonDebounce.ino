@@ -7,7 +7,7 @@
   https://www.arduino.cc/en/Tutorial/BuiltInExamples/Debounce
 */
 const int pinDeBoton = 2;  // El número del pin que recibirá la señal de que el botón ha sido presionado
-const int ledPin = 7;    // El pin al que está conectado el led
+const int ledPin = 4;    // El pin al que está conectado el led
 
 int estadoLed = HIGH;        // El estado actual de salida para el led
 int estadoDelBoton;            // La lectura actual del pin de entrada
@@ -28,7 +28,7 @@ void setup() {
 }
 
 void loop() {
-  // Leoo el estado del switch en una variable local read the state of the switch into a local variable:
+  // Leo el estado del switch en una variable local read the state of the switch into a local variable:
   int lectura = digitalRead(pinDeBoton);
 
   // Observo si el botón fue presionado, y si pasó el tiempo suficiente desde la última vez que se lo presionó
@@ -41,9 +41,8 @@ void loop() {
   }
 
   if ((millis() - ultimoMomentoDeRebote) > delayRebote) {
-    // Si entré a este if, es porque el tiempo desde
-    // whatever the lectura is at, it's been there for longer than the debounce
-    // delay, so take it as the actual current state:
+    // Si entré a este if, es porque el tiempo desde el último rebote fue suficiente. 
+    // Es decir, estoy en condiciones de tomar un nuevo estado
 
     // Si el estado del botón cambió:
     if (lectura != estadoDelBoton) {
@@ -59,6 +58,6 @@ void loop() {
   // Actualizo el estado del led
   digitalWrite(ledPin, estadoLed);
 
-  // save the lectura. Next time through the loop, it'll be the ultimoEstadoDelBoton:
+  // Guardo el valor de lectura. La próxima vez a lo largo del loop, será ultimoEstadoDelBoton.
   ultimoEstadoDelBoton = lectura;
 }
