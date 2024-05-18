@@ -1,6 +1,6 @@
 /*
   El circuito:
-  - LED desde el pin (pin 7 en este ejemplo) hasta tierra a través de una resistencia de 220 omh
+  - LED desde el pin (pin 4 en este ejemplo) hasta tierra a través de una resistencia de 220 omh
   - Botón desde pin 2 a +5V
   - Resistencia de 10 kilohmios desde pin 2 a tierra
 
