@@ -1,63 +1,122 @@
-/*
-  El circuito:
-  - LED desde el pin (pin 4 en este ejemplo) hasta tierra a través de una resistencia de 220 omh
-  - Botón desde pin 2 a +5V
-  - Resistencia de 10 kilohmios desde pin 2 a tierra
+#include <LiquidCrystal_I2C.h>
+#include  <Wire.h>
 
-  https://www.arduino.cc/en/Tutorial/BuiltInExamples/Debounce
-*/
-const int pinDeBoton = 2;  // El número del pin que recibirá la señal de que el botón ha sido presionado
-const int ledPin = 4;    // El pin al que está conectado el led
+LiquidCrystal_I2C lcd(0x27,  16, 2);
 
+const uint8_t pinDeBoton = 2;  // El número del pin que recibirá la señal de que el botón ha sido presionado
+const uint8_t ledPin = 4;    // El pin al que está conectado el led
 int estadoLed = HIGH;        // El estado actual de salida para el led
 int estadoDelBoton;            // La lectura actual del pin de entrada
 int ultimoEstadoDelBoton = LOW;  // La lectura anterior del pin de entrada
-
-
-// Las siguientes variables son longs sin signo porque el tiempo, almacenado en milisegundos,
-// rápidamente se convertirá en un número más grande del que puede ser almacenado en int
 unsigned long ultimoMomentoDeRebote = 0;  // El último momento que el pin de salida fue activado
-unsigned long delayRebote = 50;    // El tiempo de rebote. Se puede aumentar manualmente si el mismo es muy bajo
+const uint8_t delayRebote = 50;    // El tiempo de rebote. Se puede aumentar manualmente si el mismo es muy bajo
 
-void setup() {
-  pinMode(pinDeBoton, INPUT);
-  pinMode(ledPin, OUTPUT);
+bool playerUp = true;
+uint8_t contador = 0;
 
-  // Damos un valor inicial al led
-  digitalWrite(ledPin, estadoLed);
+byte player[8] = {
+  B00000,
+  B10010,
+  B11100,
+  B00111,
+  B00111,
+  B11100,
+  B10010,
+  B00000
+};
+
+byte alien[8] = {
+  B11011,
+  B11011,
+  B01110,
+  B00100,
+  B00100,
+  B01110,
+  B11011,
+  B11011
+};
+
+byte sonrisa[8] = {
+  B00000,
+  B01010,
+  B01010,
+  B01010,
+  B00000,
+  B10001,
+  B11011,
+  B01110
+};
+
+uint8_t aliens[6] = {80, 80, 80, 80, 80, 80};
+uint8_t proxAlien;
+
+void generarAlien(){
+  if(aliens[0] == 0 || aliens[0] == 16 || aliens[5] == 80){
+    for(int i=0; i < 5; i++){
+      aliens[i] = aliens[i+1];
+    }
+    aliens[5] = (random(0, 2) * 16 + 15);
+  }
 }
 
-void loop() {
-  // Leo el estado del switch en una variable local read the state of the switch into a local variable:
+void boton(){
   int lectura = digitalRead(pinDeBoton);
-
-  // Observo si el botón fue presionado, y si pasó el tiempo suficiente desde la última vez que se lo presionó
-  // Si no pasó suficiente tiempo, la señal es ignorada
-
-  // Si el switch cambió, sea por ruido o presionado:
   if (lectura != ultimoEstadoDelBoton) {
-    // Actualizo el momento del último rebote
     ultimoMomentoDeRebote = millis();
   }
 
   if ((millis() - ultimoMomentoDeRebote) > delayRebote) {
-    // Si entré a este if, es porque el tiempo desde el último rebote fue suficiente. 
-    // Es decir, estoy en condiciones de tomar un nuevo estado
-
-    // Si el estado del botón cambió:
     if (lectura != estadoDelBoton) {
       estadoDelBoton = lectura;
-
-      // Sólo cambio el valor del led si el nuevo estado del botón es HIGH
       if (estadoDelBoton == HIGH) {
         estadoLed = !estadoLed;
+        playerUp = !playerUp;
       }
     }
   }
-
-  // Actualizo el estado del led
   digitalWrite(ledPin, estadoLed);
-
-  // Guardo el valor de lectura. La próxima vez a lo largo del loop, será ultimoEstadoDelBoton.
   ultimoEstadoDelBoton = lectura;
+}
+
+void avanzarPantalla(){
+  lcd.scrollDisplayLeft();
+
+  if(playerUp){lcd.setCursor(0,0);}
+  else{lcd.setCursor(0,1);}
+  lcd.print(char(0));
+
+  for(int i = 0; i < 6; i++){
+      lcd.setCursor((aliens[i] - 16*(aliens[i]/15)), (aliens[i]/15));
+      lcd.print(char(1));
+  }
+}
+
+void setup() {
+  pinMode(2, INPUT);
+  lcd.init();
+  lcd.backlight();
+
+  lcd.createChar(0, player);
+  lcd.createChar(1, alien);
+  lcd.createChar(2, sonrisa);  
+
+  lcd.setCursor(0, 0);            //  Columna, Fila
+  lcd.print("Iniciando...");
+  delay(1500);
+  lcd.clear();
+  
+  lcd.setCursor(0, 0);
+  lcd.print(char(0));
+}
+
+void loop() {
+  lcd.clear();
+  boton();
+  if(playerUp == true){lcd.setCursor(0,0);}
+  else{lcd.setCursor(0,1);}
+  lcd.print(char(0));
+
+  if(contador == 0){generarAlien();}
+  contador = (contador%3);
+  delay(100);
 }
